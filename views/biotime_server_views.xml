@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="biotime_server_view_form" model="ir.ui.view">
+        <field name="name">biotime.server.form</field>
+        <field name="model">biotime.server</field>
+        <field name="arch" type="xml">
+            <form string="BioTime Server">
+                <header>
+                    <button name="action_test_connection" string="Test Connection" type="object" class="btn-primary"/>
+                    <button name="action_sync_devices" string="Sync Devices" type="object"/>
+                    <button name="action_ping_devices" string="Ping Devices" type="object"/>
+                    <button name="action_sync_employees" string="Pull Employees" type="object"/>
+                    <button name="action_push_all" string="Push Master Data" type="object"
+                            confirm="Push departments, work locations and employees to BioTime?"/>
+                    <button name="%(biotime_connect_pro.biotime_pull_wizard_action)d" string="Pull Transactions"
+                            type="action" context="{'default_server_id': id}"/>
+                    <button name="action_enqueue_pull" string="Queue Pull" type="object"/>
+                    <button name="action_process_pending" string="Transfer to Attendance" type="object"/>
+                    <button name="action_retry_all_errors" string="Retry All Failed" type="object"
+                            confirm="Retry every failed/skipped punch and transfer them to attendance?"/>
+                    <button name="action_open_mapping_review" string="Review Employee Mapping" type="object"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" type="object" name="action_view_devices" icon="fa-hdd-o">
+                            <div class="o_stat_info">
+                                <span class="o_stat_value"><field name="online_count"/> / <field name="device_count"/></span>
+                                <span class="o_stat_text">Devices online</span>
+                            </div>
+                        </button>
+                        <button class="oe_stat_button" type="object" name="action_view_transactions" icon="fa-fingerprint">
+                            <field name="transaction_count" widget="statinfo" string="Punches"/>
+                        </button>
+                        <button class="oe_stat_button" type="object" name="action_view_pending" icon="fa-warning">
+                            <div class="o_stat_info">
+                                <span class="o_stat_value"><field name="pending_count"/> / <field name="error_count"/></span>
+                                <span class="o_stat_text">Pending / Errors</span>
+                            </div>
+                        </button>
+                        <button class="oe_stat_button" type="object" name="action_view_jobs" icon="fa-tasks">
+                            <field name="job_failed_count" widget="statinfo" string="Failed jobs"/>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="e.g. Head Office BioTime"/></h1>
+                    </div>
+                    <field name="active" invisible="1"/>
+                    <notebook>
+                        <page string="Connection" name="connection">
+                            <group>
+                                <group string="Server">
+                                    <field name="is_cloud"/>
+                                    <field name="protocol" invisible="is_cloud"/>
+                                    <field name="host"/>
+                                    <field name="port" invisible="is_cloud"/>
+                                    <field name="auth_type"/>
+                                    <field name="username"/>
+                                    <field name="password" password="True"/>
+                                    <field name="verify_ssl"/>
+                                    <field name="timeout"/>
+                                </group>
+                                <group string="General">
+                                    <field name="company_id" groups="base.group_multi_company"/>
+                                    <field name="timezone"/>
+                                    <field name="last_sync_time"/>
+                                    <field name="last_device_sync"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Synchronization" name="sync">
+                            <group>
+                                <group string="Pull (BioTime to Odoo)">
+                                    <field name="auto_sync"/>
+                                    <field name="sync_interval" invisible="not auto_sync"/>
+                                    <field name="pull_mode"/>
+                                    <field name="page_size"/>
+                                    <field name="start_time"/>
+                                    <field name="overlap_minutes"/>
+                                </group>
+                                <group string="Real-time &amp; Device Health">
+                                    <field name="webhook_token"/>
+                                    <field name="ping_devices"/>
+                                    <field name="last_device_ping" readonly="1"/>
+                                </group>
+                                <group string="Employees &amp; Push (Odoo to BioTime)">
+                                    <field name="mapping_field"/>
+                                    <field name="auto_create_employee"/>
+                                    <field name="employee_push_mode"/>
+                                    <field name="code_prefix"/>
+                                    <field name="root_department_id"/>
+                                    <field name="default_area_id"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Attendance Rules" name="rules">
+                            <group>
+                                <group string="Punch Pairing">
+                                    <field name="pairing_mode"/>
+                                    <field name="punch_state_in" invisible="pairing_mode != 'explicit'"/>
+                                    <field name="punch_state_out" invisible="pairing_mode != 'explicit'"/>
+                                    <field name="min_punch_gap"/>
+                                    <field name="max_shift_hours"/>
+                                    <field name="default_shift_hours"/>
+                                </group>
+                                <group string="Late / Overtime">
+                                    <field name="late_tolerance"/>
+                                    <field name="early_out_tolerance"/>
+                                    <field name="break_minutes"/>
+                                    <field name="break_after_hours"/>
+                                    <field name="overtime_threshold"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Job Queue" name="queue">
+                            <group>
+                                <field name="retry_delays"/>
+                                <field name="max_retries"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="biotime_server_view_list" model="ir.ui.view">
+        <field name="name">biotime.server.list</field>
+        <field name="model">biotime.server</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="host"/>
+                <field name="is_cloud"/>
+                <field name="auto_sync"/>
+                <field name="last_sync_time"/>
+                <field name="pending_count"/>
+                <field name="error_count"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="biotime_server_view_kanban" model="ir.ui.view">
+        <field name="name">biotime.server.kanban</field>
+        <field name="model">biotime.server</field>
+        <field name="arch" type="xml">
+            <kanban>
+                <field name="name"/>
+                <field name="online_count"/>
+                <field name="device_count"/>
+                <field name="pending_count"/>
+                <field name="error_count"/>
+                <field name="last_sync_time"/>
+                <templates>
+                    <t t-name="card">
+                        <field name="name" class="fw-bold fs-4"/>
+                        <div class="text-muted"><field name="host"/></div>
+                        <div class="mt-2">
+                            <span class="badge text-bg-success me-1"><field name="online_count"/> / <field name="device_count"/> devices online</span>
+                            <span class="badge text-bg-warning me-1"><field name="pending_count"/> pending</span>
+                            <span class="badge text-bg-danger"><field name="error_count"/> errors</span>
+                        </div>
+                        <div class="text-muted mt-2">Last sync: <field name="last_sync_time"/></div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="biotime_server_action" model="ir.actions.act_window">
+        <field name="name">Servers</field>
+        <field name="res_model">biotime.server</field>
+        <field name="view_mode">kanban,list,form</field>
+    </record>
+</odoo>

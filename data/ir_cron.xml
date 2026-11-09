@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="ir_cron_biotime_schedule" model="ir.cron">
+        <field name="name">BioTime: schedule syncs</field>
+        <field name="model_id" ref="model_biotime_server"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_schedule()</field>
+        <field name="interval_number">5</field>
+        <field name="interval_type">minutes</field>
+        <field name="active" eval="True"/>
+    </record>
+    <record id="ir_cron_biotime_jobs" model="ir.cron">
+        <field name="name">BioTime: run background jobs</field>
+        <field name="model_id" ref="model_biotime_job"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_run_jobs()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">minutes</field>
+        <field name="active" eval="True"/>
+    </record>
+    <record id="ir_cron_biotime_process" model="ir.cron">
+        <field name="name">BioTime: transfer punches to attendance</field>
+        <field name="model_id" ref="model_biotime_transaction"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_process()</field>
+        <field name="interval_number">10</field>
+        <field name="interval_type">minutes</field>
+        <field name="active" eval="True"/>
+    </record>
+    <record id="ir_cron_biotime_stale" model="ir.cron">
+        <field name="name">BioTime: close stale open attendances</field>
+        <field name="model_id" ref="hr_attendance.model_hr_attendance"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_close_stale()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="active" eval="True"/>
+    </record>
+    <record id="ir_cron_biotime_ping" model="ir.cron">
+        <field name="name">BioTime: ping devices</field>
+        <field name="model_id" ref="model_biotime_server"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_ping_devices()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">hours</field>
+        <field name="active" eval="True"/>
+    </record>
+</odoo>

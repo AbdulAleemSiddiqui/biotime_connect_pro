@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_biotime_root" name="BioTime" sequence="45"
+              groups="biotime_connect_pro.group_biotime_supervisor"/>
+    <menuitem id="menu_biotime_dashboard" name="Dashboard" parent="menu_biotime_root"
+              action="biotime_dashboard_client_action" sequence="1"/>
+    <menuitem id="menu_biotime_attendance" name="Attendance" parent="menu_biotime_root"
+              action="biotime_attendance_action" sequence="2"/>
+    <menuitem id="menu_biotime_transactions" name="Transactions" parent="menu_biotime_root"
+              action="biotime_transaction_action" sequence="3"/>
+    <menuitem id="menu_biotime_devices" name="Devices" parent="menu_biotime_root"
+              action="biotime_device_action" sequence="4"/>
+    <menuitem id="menu_biotime_config" name="Configuration" parent="menu_biotime_root" sequence="90"
+              groups="biotime_connect_pro.group_biotime_manager"/>
+    <menuitem id="menu_biotime_servers" name="Servers" parent="menu_biotime_config"
+              action="biotime_server_action" sequence="1"/>
+    <menuitem id="menu_biotime_jobs" name="Job Queue" parent="menu_biotime_config"
+              action="biotime_job_action" sequence="2"/>
+    <menuitem id="menu_biotime_logs" name="Sync Logs" parent="menu_biotime_config"
+              action="biotime_log_action" sequence="3"/>
+</odoo>

@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+<t t-name="biotime_connect_pro.BioTimeDashboard">
+    <div class="bt_dash">
+
+        <!-- ======================= header ======================= -->
+        <div class="bt_head">
+            <div class="bt_head_left">
+                <div class="bt_logo"><i class="fa fa-bar-chart"/></div>
+                <div>
+                    <h4 class="bt_title">BioTime Dashboard</h4>
+                    <div class="bt_sub">
+                        Last sync: <t t-esc="state.data?.header.last_sync"/>
+                        <span t-attf-class="bt_pill bt_pill_{{state.data?.header.last_status === 'SUCCESS' ? 'ok' : state.data?.header.last_status === 'FAILED' ? 'bad' : 'warn'}}">
+                            <t t-esc="state.data?.header.last_status"/>
+                        </span>
+                        <span class="bt_auto">· auto-refresh 60s</span>
+                    </div>
+                </div>
+            </div>
+            <div class="bt_head_actions">
+                <button class="btn bt_btn" t-on-click="load" t-att-disabled="state.syncing">
+                    <i class="fa fa-refresh"/> Refresh
+                </button>
+                <button class="btn bt_btn_primary" t-on-click="() => this.sync('action_dashboard_sync')"
+                        t-att-disabled="state.syncing">
+                    <i class="fa fa-bolt"/>
+                    <t t-if="state.syncing">Queuing…</t>
+                    <t t-else="">Sync to Attendances</t>
+                </button>
+            </div>
+        </div>
+
+        <!-- ======================= alerts ======================= -->
+        <div class="bt_alerts" t-if="state.data?.alerts.length">
+            <div class="bt_alerts_head">
+                <i class="fa fa-exclamation-circle"/> System Alerts
+                (<t t-esc="state.data.alerts.length"/>)
+            </div>
+            <div t-foreach="state.data.alerts" t-as="a" t-key="a.id"
+                 t-attf-class="bt_alert bt_alert_{{a.severity}}">
+                <div class="bt_alert_txt">
+                    <b><t t-esc="a.title"/></b> — <t t-esc="a.description"/>
+                </div>
+                <div class="bt_alert_actions">
+                    <t t-if="a.action === 'retry_sync'">
+                        <button class="btn bt_btn bt_btn_sm" t-on-click="() => this.sync('action_dashboard_sync')">
+                            <i class="fa fa-refresh"/> Sync Now
+                        </button>
+                    </t>
+                    <t t-elif="a.action === 'view_devices'">
+                        <button class="btn bt_btn bt_btn_sm"
+                                t-on-click="() => this.action.doAction('biotime_connect_pro.biotime_device_action')">
+                            View Devices
+                        </button>
+                    </t>
+                    <t t-elif="a.action === 'view_jobs'">
+                        <button class="btn bt_btn bt_btn_sm"
+                                t-on-click="() => this.action.doAction('biotime_connect_pro.biotime_job_action')">
+                            Open Job Queue
+                        </button>
+                    </t>
+                </div>
+            </div>
+        </div>
+
+        <!-- ======================= KPI tiles (clickable) ======================= -->
+        <div class="bt_kpis">
+            <button class="bt_kpi bt_kpi_blue" t-on-click="() => this.kpiClick('employees')">
+                <div class="bt_kpi_val" t-esc="state.data?.kpis.employees"/>
+                <div class="bt_kpi_lbl"><i class="fa fa-users"/> Total Employees</div>
+                <div class="bt_kpi_hint">view employees</div>
+            </button>
+            <button class="bt_kpi bt_kpi_green" t-on-click="() => this.kpiClick('present')">
+                <div class="bt_kpi_val" t-esc="state.data?.kpis.present"/>
+                <div class="bt_kpi_lbl"><i class="fa fa-check-circle"/> Present Today</div>
+                <div class="bt_kpi_hint">view attendance</div>
+            </button>
+            <button class="bt_kpi bt_kpi_amber" t-on-click="() => this.kpiClick('late')">
+                <div class="bt_kpi_val" t-esc="state.data?.kpis.late"/>
+                <div class="bt_kpi_lbl"><i class="fa fa-clock-o"/> Late Today</div>
+                <div class="bt_kpi_hint">view late-ins</div>
+            </button>
+            <button class="bt_kpi bt_kpi_red" t-on-click="() => this.kpiClick('missing')">
+                <div class="bt_kpi_val" t-esc="state.data?.kpis.absent"/>
+                <div class="bt_kpi_lbl"><i class="fa fa-user-times"/> Absent Today</div>
+                <div class="bt_kpi_hint">missing check-outs</div>
+            </button>
+        </div>
+
+        <!-- ======================= metric cards ======================= -->
+        <div class="bt_metrics">
+            <div class="bt_card">
+                <div class="bt_card_head">
+                    <span><i class="fa fa-line-chart"/> 7-Day Trend</span>
+                    <span class="bt_muted">present vs late</span>
+                </div>
+                <svg class="bt_trend" viewBox="0 0 560 190" preserveAspectRatio="xMidYMid meet">
+                    <line x1="0" y1="150.5" x2="560" y2="150.5" class="bt_axis"/>
+                    <g t-foreach="state.data?.trend || []" t-as="d" t-key="d.day">
+                        <t t-set="gx" t-value="Math.round(560 / (state.data.trend.length) * d_index)"/>
+                        <t t-set="ph" t-value="Math.max(4, Math.round(d.present / Math.max(1, trendMax()) * 118))"/>
+                        <t t-set="lh" t-value="Math.max(4, Math.round(d.late / Math.max(1, trendMax()) * 118))"/>
+                        <rect t-att-x="gx + 14" t-att-y="150 - ph" width="24" t-att-height="ph"
+                              rx="4" class="bt_bar_present"/>
+                        <rect t-att-x="gx + 44" t-att-y="150 - lh" width="24" t-att-height="lh"
+                              rx="4" class="bt_bar_late"/>
+                        <text t-if="d.present" class="bt_trend_val" t-att-x="gx + 26"
+                              t-att-y="150 - ph - 6" text-anchor="middle" t-esc="d.present"/>
+                        <text t-if="d.late" class="bt_trend_val bt_trend_val_amber" t-att-x="gx + 56"
+                              t-att-y="150 - lh - 6" text-anchor="middle" t-esc="d.late"/>
+                        <text class="bt_trend_lbl" t-att-x="gx + 41" y="174"
+                              text-anchor="middle" t-esc="d.label + ' ' + d.day"/>
+                    </g>
+                </svg>
+                <div class="bt_legend">
+                    <span><i class="bt_dot bt_dot_green"/> Present employees</span>
+                    <span><i class="bt_dot bt_dot_amber"/> Late arrivals</span>
+                </div>
+            </div>
+
+            <div class="bt_card">
+                <div class="bt_card_head">
+                    <span><i class="fa fa-calendar-check-o"/> Payroll Review Window</span>
+                </div>
+                <div class="bt_payroll">
+                    <div class="bt_payroll_days">
+                        <div class="bt_payroll_num" t-esc="state.data?.payroll.days_left"/>
+                        <div class="bt_payroll_unit">days left<br/>to review</div>
+                    </div>
+                    <div class="bt_payroll_info">
+                        <div>Period <b t-esc="state.data?.payroll.start"/> → <b t-esc="state.data?.payroll.deadline"/></div>
+                        <div class="bt_muted">Late arrivals this period:
+                            <b t-esc="state.data?.payroll.late_count"/>
+                            (<t t-esc="state.data?.payroll.late_minutes"/> min total)
+                        </div>
+                        <div class="bt_muted bt_small">Payroll stays manual — attendance is never posted automatically.</div>
+                    </div>
+                </div>
+                <div class="bt_card_head bt_card_head_top">
+                    <span><i class="fa fa-database"/> HR Synchronization</span>
+                    <span class="bt_pill bt_pill_ok" t-esc="state.data?.metrics.sync_pct + '%'"/>
+                </div>
+                <div class="bt_syncbar">
+                    <div class="bt_syncbar_fill" t-attf-style="width: {{state.data?.metrics.sync_pct || 0}}%"/>
+                </div>
+                <div class="bt_muted bt_small">
+                    <t t-esc="state.data?.metrics.synced"/> punches synced ·
+                    <t t-esc="state.data?.metrics.queue"/> in queue
+                </div>
+            </div>
+        </div>
+
+        <!-- ======================= two-column zone ======================= -->
+        <div class="bt_cols">
+            <div class="bt_card">
+                <div class="bt_card_head">
+                    <span><i class="fa fa-th-list"/> Recent Attendances</span>
+                    <button class="btn bt_link" t-on-click="() => this.openAttAction()">
+                        View all <i class="fa fa-arrow-right"/>
+                    </button>
+                </div>
+                <div class="bt_table_wrap">
+                    <table class="bt_table">
+                        <thead>
+                            <tr><th>Employee</th><th>Date</th><th>In</th><th>Out</th><th>Hours</th><th>Status</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr t-foreach="state.data?.recent || []" t-as="r" t-key="r.employee + r.date + r.check_in">
+                                <td class="bt_emp" t-esc="r.employee"/>
+                                <td t-esc="r.date"/>
+                                <td t-esc="r.check_in"/>
+                                <td t-esc="r.check_out"/>
+                                <td t-esc="r.hours"/>
+                                <td><span t-attf-class="bt_status bt_status_{{r.status}}" t-esc="r.status_label"/></td>
+                            </tr>
+                            <tr t-if="!state.data?.recent.length">
+                                <td colspan="6" class="bt_empty">No attendance records yet — run a sync.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="bt_col_right">
+                <div class="bt_card">
+                    <div class="bt_card_head">
+                        <span><i class="fa fa-warning"/> Top Late Arrivals (7 days)</span>
+                    </div>
+                    <div t-foreach="state.data?.top_late || []" t-as="s" t-key="s.employee" class="bt_late_row">
+                        <span class="bt_avatar" t-esc="s.initial"/>
+                        <div class="bt_late_name">
+                            <b t-esc="s.employee"/>
+                            <div class="bt_muted bt_small" t-esc="s.department"/>
+                        </div>
+                        <span class="bt_chip bt_chip_amber">
+                            <t t-esc="s.count"/> times (<t t-esc="s.minutes"/> min)
+                        </span>
+                    </div>
+                    <div t-if="!state.data?.top_late.length" class="bt_empty">
+                        No late arrivals this week 🎉
+                    </div>
+                </div>
+
+                <div class="bt_card">
+                    <div class="bt_card_head">
+                        <span><i class="fa fa-sitemap"> </i> Departments Today</span>
+                    </div>
+                    <div class="bt_table_wrap">
+                        <table class="bt_table bt_table_sm">
+                            <thead><tr><th>Department</th><th>People</th><th>Present</th><th>Late</th><th>Absent</th></tr></thead>
+                            <tbody>
+                                <tr t-foreach="state.data?.departments || []" t-as="d" t-key="d.name">
+                                    <td class="bt_emp" t-esc="d.name"/>
+                                    <td t-esc="d.employees"/>
+                                    <td class="bt_green" t-esc="d.present"/>
+                                    <td class="bt_amber" t-esc="d.late"/>
+                                    <td class="bt_red" t-esc="Math.max(0, d.employees - d.present)"/>
+                                </tr>
+                                <tr t-if="!state.data?.departments.length">
+                                    <td colspan="5" class="bt_empty">No departments linked to employees yet.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="bt_card">
+                    <div class="bt_card_head"><span><i class="fa fa-bolt"/> Quick Actions</span></div>
+                    <div class="bt_quick">
+                        <button class="btn bt_quick_btn" t-on-click="() => this.sync('action_dashboard_sync_employees')"
+                                t-att-disabled="state.syncing">
+                            <i class="fa fa-users"/> Sync Employees
+                        </button>
+                        <button class="btn bt_quick_btn bt_quick_primary" t-on-click="() => this.sync('action_dashboard_sync')"
+                                t-att-disabled="state.syncing">
+                            <i class="fa fa-refresh"/> Sync to HR Attendance
+                        </button>
+                        <button class="btn bt_quick_btn bt_quick_link" t-on-click="() => this.openAttAction()">
+                            <i class="fa fa-calendar"/> View Odoo Attendances
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</t>
+
+</templates>

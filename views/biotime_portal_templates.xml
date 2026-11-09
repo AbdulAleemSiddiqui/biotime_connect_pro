@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="portal_my_biotime" name="My BioTime">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar">True</t>
+            <h3 class="mb-3">My Attendance Review</h3>
+
+            <div t-if="not employee" class="alert alert-warning">
+                Your login is not linked to an employee record. Ask HR to connect your user to your employee profile.
+            </div>
+
+            <t t-if="submitted">
+                <div class="alert alert-success">Submitted successfully. HR will review before the payroll deadline.</div>
+            </t>
+            <div t-if="error" class="alert alert-danger" t-esc="error"/>
+
+            <t t-if="employee">
+                <!-- ============ open late arrivals ============ -->
+                <h5 class="mt-3">Late arrivals needing a reason</h5>
+                <div t-if="not pending_lates" class="text-muted mb-3">No open late arrivals. 🎉</div>
+                <t t-if="pending_lates">
+                    <t t-foreach="pending_lates" t-as="att">
+                        <form method="post" class="card mb-2 p-2">
+                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                            <div class="d-flex align-items-center gap-2 flex-wrap">
+                                <b t-esc="att.check_in" t-options="{'widget': 'datetime'}"/>
+                                <span class="badge text-bg-warning" t-esc="'Late %s min' % att.bt_late_minutes"/>
+                                <select name="category" class="form-select form-select-sm w-auto">
+                                    <t t-foreach="categories" t-as="cat">
+                                        <option t-att-value="cat[0]" t-esc="cat[1]"/>
+                                    </t>
+                                </select>
+                                <input type="hidden" name="form" value="late"/>
+                                <input type="hidden" name="attendance_id" t-att-value="att.id"/>
+                                <input type="text" name="reason" class="form-control form-control-sm w-auto flex-grow-1"
+                                       placeholder="Explain the late arrival…" required="required"/>
+                                <button type="submit" class="btn btn-primary btn-sm">Submit</button>
+                            </div>
+                        </form>
+                    </t>
+                </t>
+
+                <!-- ============ my reasons ============ -->
+                <h5 class="mt-4">My submitted reasons</h5>
+                <table class="table table-sm" t-if="my_reasons">
+                    <thead><tr><th>Date</th><th>Late</th><th>Category</th><th>Status</th></tr></thead>
+                    <tbody>
+                        <t t-foreach="my_reasons" t-as="r">
+                            <tr>
+                                <td t-esc="r.date" t-options="{'widget': 'datetime'}"/>
+                                <td t-esc="'%s min' % r.late_minutes"/>
+                                <td t-esc="dict(r._fields['category'].selection).get(r.category)"/>
+                                <td><span t-esc="dict(r._fields['state'].selection).get(r.state)"
+                                          t-attf-class="badge {{'text-bg-success' if r.state == 'approved' else 'text-bg-danger' if r.state == 'rejected' else 'text-bg-secondary'}}"/>
+                                </td>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
+                <div t-else="" class="text-muted mb-3">No reasons submitted yet.</div>
+
+                <!-- ============ overtime ============ -->
+                <h5 class="mt-4">Overtime claims</h5>
+                <t t-if="my_ot_days">
+                    <p class="text-muted mb-1">Your overtime hours from the device (last 30 days) — use these when claiming:</p>
+                    <table class="table table-sm mb-2">
+                        <thead><tr><th>Date</th><th>Overtime hours</th></tr></thead>
+                        <tbody>
+                            <t t-foreach="my_ot_days" t-as="d">
+                                <tr>
+                                    <td t-esc="d['date']" t-options="{'widget': 'datetime'}"/>
+                                    <td t-esc="d['hours']" t-options="{'widget': 'float_time'}"/>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+                </t>
+                <form method="post" class="card mb-2 p-2">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <div class="d-flex gap-2 flex-wrap align-items-center">
+                        <input type="hidden" name="form" value="overtime"/>
+                        <input type="date" name="date" class="form-control form-control-sm w-auto"
+                               t-att-value="today" required="required"/>
+                        <input type="number" step="0.25" min="0.25" max="12" name="hours"
+                               class="form-control form-control-sm w-auto" placeholder="Hours" required="required"/>
+                        <input type="text" name="reason" class="form-control form-control-sm w-auto flex-grow-1"
+                               placeholder="Reason / task worked on…" required="required"/>
+                        <button type="submit" class="btn btn-primary btn-sm">Claim overtime</button>
+                    </div>
+                </form>
+                <table class="table table-sm" t-if="my_overtime">
+                    <thead><tr><th>Date</th><th>Hours</th><th>Reason</th><th>Status</th></tr></thead>
+                    <tbody>
+                        <t t-foreach="my_overtime" t-as="o">
+                            <tr>
+                                <td t-esc="o.date" t-options="{'widget': 'date'}"/>
+                                <td t-esc="o.hours_claimed" t-options="{'widget': 'float_time'}"/>
+                                <td t-esc="o.reason"/>
+                                <td><span t-esc="dict(o._fields['state'].selection).get(o.state)"
+                                          t-attf-class="badge {{'text-bg-success' if o.state == 'approved' else 'text-bg-danger' if o.state == 'rejected' else 'text-bg-secondary'}}"/>
+                                </td>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
+                <div t-else="" class="text-muted">No overtime claims yet.</div>
+            </t>
+        </t>
+    </template>
+
+    <!-- Entry on the portal home page -->
+    <template id="portal_my_home_biotime" name="Portal: My BioTime entry" inherit_id="portal.portal_my_home">
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="icon" t-value="'/portal/static/src/img/portal-addresses.svg'"/>
+                <t t-set="title">My Attendance Review</t>
+                <t t-set="text">Submit late arrival reasons and overtime claims</t>
+                <t t-set="url" t-value="'/my/biotime'"/>
+            </t>
+        </xpath>
+    </template>
+</odoo>

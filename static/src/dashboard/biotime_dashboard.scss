@@ -1,0 +1,231 @@
+// BioTime Connect Pro dashboard
+.o_action:has(> .bt_dash) { height: 100%; }
+.bt_dash {
+    height: 100%;
+    overflow-y: auto;
+    padding: 12px 16px 24px;
+    max-width: 1280px;
+    margin: 0 auto;
+    color: #1a2129;
+    .fa { margin-right: 6px; }
+    .bt_card_head .fa, .bt_link .fa { margin-right: 4px; }
+}
+
+// ---------- header ----------
+.bt_head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+.bt_head_left { display: flex; align-items: center; gap: 12px; }
+.bt_logo {
+    width: 44px; height: 44px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    background: #1a2129; color: #fff; font-size: 20px;
+}
+.bt_title { margin: 0; font-weight: 700; }
+.bt_sub { font-size: 13px; color: #5a6674; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.bt_auto { color: #8a94a2; }
+.bt_head_actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.bt_btn {
+    border: 1px solid #d8dee6; background: #fff; color: #1a2129;
+    border-radius: 6px; padding: 6px 14px; font-weight: 600;
+}
+.bt_btn:hover { background: #f2f4f7; }
+.bt_btn:disabled { opacity: 0.6; }
+.bt_btn_primary {
+    border-color: #1e7d46; background: #1e7d46; color: #fff;
+    &:hover { background: #176738; color: #fff; }
+}
+.bt_btn_sm { padding: 3px 10px; font-size: 12px; }
+.bt_link { border: none; background: none; color: #6d5cd3; padding: 0; font-size: 13px; }
+
+.bt_pill {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.04em;
+    border-radius: 999px; padding: 2px 10px; margin-left: 4px;
+    &.bt_pill_ok { background: #e9f5ee; color: #1e7d46; }
+    &.bt_pill_warn { background: #faf3e2; color: #946200; }
+    &.bt_pill_bad { background: #fbeeed; color: #b3362a; }
+}
+
+// ---------- alerts ----------
+.bt_alerts {
+    border: 1px solid #d8dee6; border-radius: 10px; overflow: hidden; margin-bottom: 16px;
+    background: #fff;
+}
+.bt_alerts_head { padding: 10px 14px; font-weight: 700; background: #f2f4f7; }
+.bt_alert {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 10px; padding: 10px 14px; border-top: 1px solid #eef1f5; flex-wrap: wrap;
+    &.bt_alert_critical { border-left: 4px solid #b3362a; }
+    &.bt_alert_warning { border-left: 4px solid #d9a44a; }
+}
+.bt_alert_txt { flex: 1 1 380px; min-width: 0; font-size: 13.5px; }
+.bt_alert_actions { display: flex; gap: 6px; }
+
+// ---------- KPI tiles ----------
+.bt_kpis {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px; margin-bottom: 16px;
+}
+.bt_kpi {
+    text-align: left; border: 1px solid #d8dee6; border-radius: 10px;
+    background: #fff; padding: 16px 18px; transition: box-shadow 0.15s, transform 0.15s;
+    &:hover { box-shadow: 0 4px 14px rgba(20, 30, 40, 0.08); transform: translateY(-1px); }
+    .bt_kpi_val { font-size: 34px; font-weight: 750; line-height: 1.1; }
+    .bt_kpi_lbl { font-size: 13px; color: #5a6674; margin-top: 4px; }
+    .bt_kpi_hint { font-size: 11px; color: #8a94a2; margin-top: 8px; opacity: 0; transition: opacity 0.15s; }
+    &:hover .bt_kpi_hint { opacity: 1; }
+    &.bt_kpi_blue .bt_kpi_val { color: #2563ac; }
+    &.bt_kpi_green .bt_kpi_val { color: #1e7d46; }
+    &.bt_kpi_amber .bt_kpi_val { color: #946200; }
+    &.bt_kpi_red .bt_kpi_val { color: #b3362a; }
+}
+
+// ---------- cards ----------
+.bt_metrics, .bt_cols { display: grid; gap: 12px; margin-bottom: 12px; }
+.bt_metrics { grid-template-columns: 3fr 2fr; }
+.bt_cols { grid-template-columns: 3fr 2fr; align-items: start; }
+.bt_col_right { display: grid; gap: 12px; }
+@media (max-width: 900px) {
+    .bt_metrics, .bt_cols { grid-template-columns: 1fr; }
+}
+.bt_card {
+    border: 1px solid #d8dee6; border-radius: 10px; background: #fff; padding: 14px 16px;
+    min-width: 0;
+}
+.bt_card_head {
+    display: flex; justify-content: space-between; align-items: center;
+    font-weight: 700; font-size: 14px; margin-bottom: 10px; gap: 8px;
+    .fa { color: #6d5cd3; margin-right: 4px; }
+    &.bt_card_head_top { margin-top: 14px; border-top: 1px solid #eef1f5; padding-top: 10px; }
+}
+.bt_muted { color: #5a6674; font-weight: 400; font-size: 13px; }
+.bt_small { font-size: 12px; }
+
+// ---------- trend chart ----------
+.bt_trend { width: 100%; height: auto; }
+.bt_axis { stroke: #d8dee6; stroke-width: 1; }
+.bt_bar_present { fill: #1e7d46; }
+.bt_bar_late { fill: #d9a44a; }
+.bt_trend_lbl { font-size: 12px; fill: #5a6674; }
+.bt_trend_val { font-size: 12px; font-weight: 700; fill: #1a2129; }
+.bt_trend_val_amber { fill: #946200; }
+.bt_legend { display: flex; gap: 16px; font-size: 12px; color: #5a6674; margin-top: 4px; }
+.bt_dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; }
+.bt_dot_green { background: #1e7d46; }
+.bt_dot_amber { background: #d9a44a; }
+
+// ---------- payroll / sync ----------
+.bt_payroll { display: flex; gap: 16px; align-items: center; }
+.bt_payroll_days {
+    display: flex; align-items: center; gap: 8px;
+    background: #f2f4f7; border-radius: 10px; padding: 10px 16px; text-align: center;
+}
+.bt_payroll_num { font-size: 36px; font-weight: 800; color: #6d5cd3; line-height: 1; }
+.bt_payroll_unit { font-size: 11px; color: #5a6674; text-align: left; line-height: 1.3; }
+.bt_payroll_info { display: grid; gap: 3px; min-width: 0; }
+.bt_syncbar {
+    height: 10px; border-radius: 999px; background: #eef1f5; overflow: hidden;
+    margin-bottom: 6px;
+}
+.bt_syncbar_fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, #1e7d46, #2fa565); }
+
+// ---------- tables ----------
+.bt_table_wrap { overflow-x: auto; }
+.bt_table { width: 100%; border-collapse: collapse; font-size: 13px;
+    th { text-align: left; color: #8a94a2; font-size: 11px; text-transform: uppercase;
+         letter-spacing: 0.05em; padding: 6px 8px; border-bottom: 1px solid #eef1f5; }
+    td { padding: 8px; border-bottom: 1px solid #f2f4f7; white-space: nowrap; }
+    &.bt_table_sm { font-size: 12.5px; td, th { padding: 5px 8px; } }
+}
+.bt_emp { font-weight: 600; max-width: 220px; overflow: hidden; text-overflow: ellipsis; }
+.bt_green { color: #1e7d46; font-weight: 700; }
+.bt_amber { color: #946200; font-weight: 700; }
+.bt_red { color: #b3362a; font-weight: 700; }
+.bt_empty { color: #8a94a2; font-style: italic; padding: 16px 8px !important; }
+
+.bt_status {
+    font-size: 11px; font-weight: 700; border-radius: 4px; padding: 2px 10px; white-space: nowrap;
+    &.bt_status_present { background: #e9f5ee; color: #1e7d46; }
+    &.bt_status_excused { background: #e8f0fe; color: #2563ac; }
+    &.bt_status_late { background: #faf3e2; color: #946200; }
+    &.bt_status_missing { background: #fbeeed; color: #b3362a; }
+    &.bt_status_incomplete { background: #1a2129; color: #fff; }
+}
+
+// ---------- top late / departments ----------
+.bt_late_row {
+    display: flex; align-items: center; gap: 10px; padding: 8px 0;
+    border-bottom: 1px solid #f2f4f7;
+    &:last-of-type { border-bottom: none; }
+}
+.bt_avatar {
+    width: 34px; height: 34px; border-radius: 50%; background: #eef1f5; color: #5a6674;
+    display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0;
+}
+.bt_late_name { flex: 1; min-width: 0; b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } }
+.bt_chip {
+    font-size: 11.5px; font-weight: 700; border-radius: 999px; padding: 3px 10px; white-space: nowrap;
+    &.bt_chip_amber { background: #faf3e2; color: #946200; }
+}
+
+// ---------- quick actions ----------
+.bt_quick { display: grid; gap: 8px; }
+.bt_quick_btn {
+    border: 1px solid #d8dee6; background: #fff; border-radius: 6px;
+    padding: 9px 14px; font-weight: 600; width: 100%;
+    .fa { margin-right: 6px; }
+    &:hover { background: #f2f4f7; }
+    &:disabled { opacity: 0.6; }
+    &.bt_quick_primary { border-color: #1e7d46; color: #1e7d46;
+        &:hover { background: #e9f5ee; } }
+    &.bt_quick_link { color: #2563ac; border-color: #c7d7ec;
+        &:hover { background: #eef4fb; } }
+}
+
+// dark mode (Odoo 19 dark theme)
+.o_dark .bt_dash {
+    color: #e9edf2;
+    .bt_logo { background: #eef1f5; color: #10151b; }
+    .bt_sub, .bt_muted, .bt_auto { color: #9aa5b1; }
+    .bt_btn { background: #181f27; border-color: #2a3340; color: #e9edf2;
+        &:hover { background: #202836; } }
+    .bt_alerts, .bt_card, .bt_kpi { background: #181f27; border-color: #2a3340; }
+    .bt_alerts_head { background: #10151b; }
+    .bt_alert { border-top-color: #202836; }
+    .bt_pill_ok { background: #17261d; color: #4cbd7e; }
+    .bt_pill_warn { background: #292214; color: #d9a44a; }
+    .bt_pill_bad { background: #2b1e1c; color: #e0604f; }
+    .bt_kpi_blue .bt_kpi_val { color: #6d9ee3; }
+    .bt_kpi_green .bt_kpi_val { color: #4cbd7e; }
+    .bt_kpi_amber .bt_kpi_val { color: #d9a44a; }
+    .bt_kpi_red .bt_kpi_val { color: #e0604f; }
+    .bt_bar_present { fill: #4cbd7e; }
+    .bt_bar_late { fill: #d9a44a; }
+    .bt_axis { stroke: #2a3340; }
+    .bt_trend_lbl { fill: #9aa5b1; }
+    .bt_trend_val { fill: #e9edf2; }
+    .bt_payroll_days { background: #10151b; }
+    .bt_payroll_num { color: #9d8fe8; }
+    .bt_syncbar { background: #202836; }
+    .bt_table th { color: #6d7885; }
+    .bt_table td { border-bottom-color: #202836; }
+    .bt_avatar { background: #202836; color: #9aa5b1; }
+    .bt_late_row { border-bottom-color: #202836; }
+    .bt_status_present { background: #17261d; color: #4cbd7e; }
+    .bt_status_excused { background: #1a2636; color: #6d9ee3; }
+    .bt_status_late { background: #292214; color: #d9a44a; }
+    .bt_status_missing { background: #2b1e1c; color: #e0604f; }
+    .bt_status_incomplete { background: #eef1f5; color: #10151b; }
+    .bt_quick_btn { background: #181f27; border-color: #2a3340; color: #e9edf2; }
+    .bt_quick_link { color: #6d9ee3; border-color: #2f4257; }
+    .bt_green { color: #4cbd7e; }
+    .bt_amber { color: #d9a44a; }
+    .bt_red { color: #e0604f; }
+    .bt_link { color: #9d8fe8; }
+}

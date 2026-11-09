@@ -1,0 +1,21 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_biotime_server_user,biotime.server user,model_biotime_server,group_biotime_user,1,0,0,0
+access_biotime_server_manager,biotime.server manager,model_biotime_server,group_biotime_manager,1,1,1,1
+access_biotime_device_user,biotime.device user,model_biotime_device,group_biotime_user,1,0,0,0
+access_biotime_device_manager,biotime.device manager,model_biotime_device,group_biotime_manager,1,1,1,1
+access_biotime_transaction_user,biotime.transaction user,model_biotime_transaction,group_biotime_user,1,0,0,0
+access_biotime_transaction_supervisor,biotime.transaction supervisor,model_biotime_transaction,group_biotime_supervisor,1,1,0,0
+access_biotime_transaction_manager,biotime.transaction manager,model_biotime_transaction,group_biotime_manager,1,1,1,1
+access_biotime_log_user,biotime.sync.log user,model_biotime_sync_log,group_biotime_user,1,0,0,0
+access_biotime_log_manager,biotime.sync.log manager,model_biotime_sync_log,group_biotime_manager,1,1,1,1
+access_biotime_job_user,biotime.job user,model_biotime_job,group_biotime_user,1,0,0,0
+access_biotime_job_supervisor,biotime.job supervisor,model_biotime_job,group_biotime_supervisor,1,1,1,0
+access_biotime_job_manager,biotime.job manager,model_biotime_job,group_biotime_manager,1,1,1,1
+access_biotime_map_manager,biotime.remote.map manager,model_biotime_remote_map,group_biotime_manager,1,1,1,1
+access_biotime_pull_wizard_supervisor,biotime.pull.wizard supervisor,model_biotime_pull_wizard,group_biotime_supervisor,1,1,1,1
+access_biotime_late_reason_user,biotime.late.reason user,model_biotime_late_reason,group_biotime_user,1,1,1,0
+access_biotime_late_reason_manager,biotime.late.reason manager,model_biotime_late_reason,group_biotime_manager,1,1,1,1
+access_biotime_overtime_user,biotime.overtime.sheet user,model_biotime_overtime_sheet,group_biotime_user,1,1,1,0
+access_biotime_overtime_manager,biotime.overtime.sheet manager,model_biotime_overtime_sheet,group_biotime_manager,1,1,1,1
+access_biotime_mapping_user,biotime.mapping.review user,model_biotime_mapping_review,group_biotime_user,1,1,1,0
+access_biotime_mapping_manager,biotime.mapping.review manager,model_biotime_mapping_review,group_biotime_manager,1,1,1,1

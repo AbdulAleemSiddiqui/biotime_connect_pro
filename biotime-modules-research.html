@@ -1,0 +1,627 @@
+<title>BioTime Connector Research</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+  :root {
+    /* Cool paper neutrals, ink foreground, signal-red accent (biometric LED cue) */
+    --bg: #f2f4f7;
+    --surface: #ffffff;
+    --fg: #161d26;
+    --muted: #5a6674;
+    --faint: #8a94a2;
+    --line: #d8dee6;
+    --accent: #b3362a;
+    --accent-soft: #fbeeed;
+    --ok: #1e7d46;
+    --ok-soft: #e9f5ee;
+    --warn: #946200;
+    --warn-soft: #faf3e2;
+    --ink-band: #161d26;
+    --ink-band-fg: #eef1f5;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #10151b;
+      --surface: #181f27;
+      --fg: #e9edf2;
+      --muted: #9aa5b1;
+      --faint: #6d7885;
+      --line: #2a3340;
+      --accent: #e0604f;
+      --accent-soft: #2b1e1c;
+      --ok: #4cbd7e;
+      --ok-soft: #17261d;
+      --warn: #d9a44a;
+      --warn-soft: #292214;
+      --ink-band: #05080c;
+      --ink-band-fg: #e9edf2;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #10151b;
+    --surface: #181f27;
+    --fg: #e9edf2;
+    --muted: #9aa5b1;
+    --faint: #6d7885;
+    --line: #2a3340;
+    --accent: #e0604f;
+    --accent-soft: #2b1e1c;
+    --ok: #4cbd7e;
+    --ok-soft: #17261d;
+    --warn: #d9a44a;
+    --warn-soft: #292214;
+    --ink-band: #05080c;
+    --ink-band-fg: #e9edf2;
+    color-scheme: dark;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: "Public Sans", "Segoe UI", system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.62;
+    margin: 0;
+    padding-block: 0 64px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 880px; margin: 0 auto; }
+
+  h1, h2, h3, h4 {
+    font-family: "Archivo", "Public Sans", system-ui, sans-serif;
+    text-wrap: balance;
+    line-height: 1.2;
+    margin: 0;
+  }
+
+  code, .mono {
+    font-family: "JetBrains Mono", ui-monospace, Consolas, monospace;
+    font-size: 0.86em;
+  }
+
+  a { color: var(--accent); }
+
+  /* ---------- header band ---------- */
+  header.band {
+    background: var(--ink-band);
+    color: var(--ink-band-fg);
+    margin-block: 0 40px;
+    padding-block: 44px 40px;
+  }
+  header.band .wrap { padding-left: 0; padding-right: 0; }
+  .kicker {
+    font-family: "Archivo", sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #e0604f;
+    margin-bottom: 14px;
+  }
+  header.band h1 { font-size: clamp(28px, 5.4vw, 42px); font-weight: 800; letter-spacing: -0.01em; max-width: 21ch; }
+  header.band p.lede {
+    margin: 16px 0 0;
+    max-width: 62ch;
+    color: #b6c0cb;
+    font-size: 17px;
+  }
+  .band-meta {
+    margin-top: 26px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 10px;
+  }
+  .band-meta span {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12px;
+    color: #9aa5b1;
+    border: 1px solid #2a3340;
+    border-radius: 4px;
+    padding: 3px 9px;
+  }
+
+  /* ---------- sections ---------- */
+  section { margin-bottom: 56px; }
+  h2 {
+    font-size: 24px;
+    font-weight: 750;
+    letter-spacing: -0.01em;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--line);
+    margin-bottom: 22px;
+  }
+  h2 .secno { color: var(--accent); font-variant-numeric: tabular-nums; margin-right: 12px; }
+  h3 { font-size: 17px; font-weight: 700; margin: 26px 0 10px; }
+  p { margin: 0 0 14px; }
+  .lede-p { font-size: 17.5px; color: var(--fg); max-width: 68ch; }
+  .muted { color: var(--muted); }
+  small { color: var(--muted); }
+
+  /* ---------- verdict tiles ---------- */
+  .tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .tile {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 14px 16px;
+  }
+  .tile .t-label {
+    font-family: "Archivo", sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .tile .t-value { font-family: "Archivo", sans-serif; font-size: 24px; font-weight: 750; line-height: 1.1; }
+  .tile .t-note { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+  /* ---------- module profiles ---------- */
+  .module {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    margin-bottom: 18px;
+    overflow: hidden;
+  }
+  .module > .m-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 8px 14px;
+    padding: 16px 20px 12px;
+  }
+  .module > .m-head h3 { margin: 0; font-size: 19px; }
+  .module .m-tag {
+    font-size: 12.5px;
+    color: var(--muted);
+    font-style: italic;
+    flex-basis: 100%;
+  }
+  .badges { display: flex; flex-wrap: wrap; gap: 6px; margin-left: auto; }
+  .badge {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 2px 8px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .module .m-body { padding: 4px 20px 18px; }
+  .module ul { margin: 8px 0 0; padding-left: 20px; }
+  .module li { margin-bottom: 6px; }
+  .module .m-note {
+    margin-top: 14px;
+    padding: 10px 14px;
+    background: var(--warn-soft);
+    border-radius: 6px;
+    font-size: 13.5px;
+    color: var(--fg);
+  }
+
+  /* ---------- tables ---------- */
+  .tbl-scroll { overflow-x: auto; margin: 14px 0 6px; }
+  table { border-collapse: collapse; width: 100%; min-width: 640px; font-size: 14px; }
+  th, td {
+    border: 1px solid var(--line);
+    padding: 8px 12px;
+    text-align: left;
+    vertical-align: top;
+  }
+  thead th {
+    background: var(--surface);
+    font-family: "Archivo", sans-serif;
+    font-size: 12.5px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+  tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--surface) 55%, var(--bg)); }
+  td.num, th.num { font-variant-numeric: tabular-nums; }
+  .matrix td { text-align: center; font-size: 15px; }
+  .matrix td:first-child, .matrix th:first-child { text-align: left; min-width: 230px; }
+  .y { color: var(--ok); font-weight: 700; }
+  .p { color: var(--warn); font-weight: 700; }
+  .n { color: var(--faint); }
+
+  /* ---------- feature tiers ---------- */
+  .tier {
+    border-left: 3px solid var(--accent);
+    background: var(--surface);
+    border-radius: 0 8px 8px 0;
+    padding: 14px 18px;
+    margin-bottom: 14px;
+  }
+  .tier h3 { margin: 0 0 8px; font-size: 16px; }
+  .tier ul { margin: 0; padding-left: 20px; }
+  .tier li { margin-bottom: 5px; }
+  .tier.t2 { border-left-color: var(--warn); }
+  .tier.t3 { border-left-color: var(--faint); }
+
+  /* ---------- flow ---------- */
+  ol.flow { counter-reset: step; list-style: none; padding: 0; margin: 14px 0; }
+  ol.flow li {
+    counter-increment: step;
+    position: relative;
+    padding: 0 0 16px 52px;
+    margin: 0;
+  }
+  ol.flow li::before {
+    content: counter(step, decimal-leading-zero);
+    position: absolute;
+    left: 0;
+    top: 1px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent);
+    border: 1px solid var(--line);
+    background: var(--surface);
+    border-radius: 4px;
+    padding: 3px 7px;
+  }
+  ol.flow li::after {
+    content: "";
+    position: absolute;
+    left: 14px;
+    top: 28px;
+    bottom: 4px;
+    width: 1px;
+    background: var(--line);
+  }
+  ol.flow li:last-child::after { display: none; }
+  ol.flow b { display: block; font-family: "Archivo", sans-serif; font-size: 15px; }
+
+  pre.code {
+    background: var(--ink-band);
+    color: var(--ink-band-fg);
+    border-radius: 8px;
+    padding: 16px 18px;
+    overflow-x: auto;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    margin: 14px 0;
+  }
+
+  .callout {
+    background: var(--accent-soft);
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin: 18px 0;
+    font-size: 14.5px;
+  }
+  .callout b { font-family: "Archivo", sans-serif; }
+
+  footer { margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Public+Sans:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;700&display=swap">
+
+<header class="band">
+  <div class="wrap">
+    <div class="kicker">Market research · Odoo apps store · Nov 2025</div>
+    <h1>BioTime ↔ Odoo: six modules, one blueprint</h1>
+    <p class="lede">A close reading of every BioTime integration module on the Odoo apps store — what each one does, what they all share, where they differ, and the feature set worth building into our own connector.</p>
+    <div class="band-meta">
+      <span>biotime_sync</span>
+      <span>yasir_biotime_server_integration_v18</span>
+      <span>ms_bitotime</span>
+      <span>de_zkbiotime_integration</span>
+      <span>biotime_server_integration</span>
+      <span>connector_biotime</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+<section id="summary">
+  <h2><span class="secno">01</span>Executive summary</h2>
+  <p class="lede-p">All six modules solve the same core problem — pull raw punch data from a ZKTeco BioTime server over its REST API and turn it into <code>hr.attendance</code> records — but they differ sharply in engineering maturity. Three are thin cron scripts, two are solid mid-market products, and one (<code>ms_bitotime</code>) is the most technically ambitious despite being the second cheapest.</p>
+  <div class="tiles">
+    <div class="tile">
+      <div class="t-label">Shared core</div>
+      <div class="t-value">7 features</div>
+      <div class="t-note">present in all six — the true table stakes</div>
+    </div>
+    <div class="tile">
+      <div class="t-label">Price range</div>
+      <div class="t-value">€28–649</div>
+      <div class="t-note">quality does not track price</div>
+    </div>
+    <div class="tile">
+      <div class="t-label">Common dep.</div>
+      <div class="t-value">hr + hr_attendance</div>
+      <div class="t-note">all six, nothing heavier</div>
+    </div>
+    <div class="tile">
+      <div class="t-label">Biggest gap</div>
+      <div class="t-value">Real-time</div>
+      <div class="t-note">every module polls on cron; none use webhooks</div>
+    </div>
+  </div>
+  <p>The market consensus architecture is: <b>server config model → employee mapping by BioTime code → raw transaction staging table → pairing engine → <code>hr.attendance</code></b>, driven by a configurable cron. The modules that stand out add <b>reliability engineering</b> — idempotent re-pulls, background job queues with retries, per-punch error states — and <b>smart interpretation</b> — late-in detection, missing-checkout flags, night-shift handling, per-employee timezones. Those two axes are exactly where our extension should aim.</p>
+</section>
+
+<section id="profiles">
+  <h2><span class="secno">02</span>The six modules, one by one</h2>
+
+  <div class="module">
+    <div class="m-head">
+      <h3>1 · biotime_sync — Hunter BI</h3>
+      <div class="badges"><span class="badge">€449–649</span><span class="badge">OPL-1</span><span class="badge">2,381 LOC</span><span class="badge">v19</span></div>
+      <div class="m-tag">"The premium product" — business rules, dashboard, role-based access.</div>
+    </div>
+    <div class="m-body">
+      <ul>
+        <li><b>Auth flexibility is its party trick:</b> Token, JWT and Basic authentication — the only module advertising multiple auth schemes.</li>
+        <li><b>Business rules engine:</b> work start/end time, break duration (auto-deducted from worked hours), late tolerance (grace period), overtime threshold, sync interval — all configurable.</li>
+        <li><b>Smart calculations:</b> worked hours, late detection, overtime computed automatically.</li>
+        <li><b>Dashboard</b> with real-time attendance statistics, charts and KPIs.</li>
+        <li><b>Three access roles:</b> User / Supervisor / Manager.</li>
+        <li>Employee matching by BioTime ID <i>or barcode</i>; paginated API fetching; sync logs with status tracking and error details; Test Connection button.</li>
+      </ul>
+      <div class="m-note"><b>Take-away:</b> the clearest picture of the "complete" commercial feature set — HR-rule configuration and a dashboard. No mention of error-state queues or two-way sync.</div>
+    </div>
+  </div>
+
+  <div class="module">
+    <div class="m-head">
+      <h3>2 · yasir_biotime_server_integration_v18 — Eng. Yasir Habeeb</h3>
+      <div class="badges"><span class="badge">$590</span><span class="badge">LGPL-3</span><span class="badge">612 LOC</span><span class="badge">v18/v19</span></div>
+      <div class="m-tag">Small, focused BioTime 8.5 sync — sold at a premium on documentation quality.</div>
+    </div>
+    <div class="m-body">
+      <ul>
+        <li>Server record: <b>IP, Port, Username, Password, Page size, Start time</b> (Start time prevents importing very old transactions — an incremental-pull cursor).</li>
+        <li><b>Test Connection</b> and <b>Get transactions</b> buttons on the server record.</li>
+        <li>Employee mapping via a <code>Biotime Code</code> field on the employee's Settings tab (INFO BIOTIME section) — must match the BioTime user ID.</li>
+        <li><b>Cron every 7 minutes</b> (the tightest polling interval of the six), fetching transactions and auto-creating attendance.</li>
+        <li>Handles multiple punch-in/punch-out scenarios, late check-ins, early check-outs, missing punches; multi-device/multi-terminal environments; "safe duplicate-prevention logic".</li>
+        <li>Manual synchronization wizard for on-demand updates; dedicated menus for transactions, employees and logs under Attendances → Biotime Manager.</li>
+      </ul>
+      <div class="m-note"><b>Take-away:</b> proof that a 612-line module can command $590 with good docs. Also one of two LGPL-3 modules, so its source is legally readable — useful as a reference implementation. Marketing page has an Odoo 18/19 version discrepancy; listing quality is uneven.</div>
+    </div>
+  </div>
+
+  <div class="module">
+    <div class="m-head">
+      <h3>3 · ms_bitotime — Mohamed Saied</h3>
+      <div class="badges"><span class="badge">€69</span><span class="badge">LGPL-3</span><span class="badge">5,249 LOC</span><span class="badge">v17–19</span></div>
+      <div class="m-tag">The engineering sleeper: built-in job queue, idempotent pulls, schedule-aware interpretation.</div>
+    </div>
+    <div class="m-body">
+      <ul>
+        <li><b>Idempotent pulls:</b> punches deduplicated by BioTime ID — re-running any synced period imports zero duplicates ("safely re-run anytime"). The most explicit duplicate-prevention guarantee on the market.</li>
+        <li><b>Built-in job queue</b> (no OCA <code>queue_job</code> dependency): Jobs / Channels / Job Functions menus, job lifecycle states (Pending → Started → Done/Failed), UUID, retry counter, full error trace, one-click Requeue.</li>
+        <li><b>Channel serialization:</b> a dedicated <code>root.biotime</code> channel runs one job at a time so parallel pulls never hammer the BioTime server; automatic retries after 1/5/10/30 minutes on server unavailability.</li>
+        <li><b>Interpretation quality:</b> Late In / On Time status with exact late minutes from the real shift start; missing checkouts flagged for HR; night shifts kept as a single record spanning midnight.</li>
+        <li><b>Schedule is the baseline:</b> changing an employee's working hours or grace period automatically re-evaluates already-imported punches.</li>
+        <li>Per-employee timezone so device clock mismatches don't create false "Late In" records; configurable re-pull overlap window and max shift length.</li>
+        <li>Pull Transactions (Advanced) wizard: date range, filter by device or single employee, optional direct-to-attendance transfer.</li>
+        <li>Dashboard: attendance chart, today's attendances, employees, total devices; quick-action pipeline Devices → Employees → Transactions → Attendance with live counters.</li>
+        <li>Raw transaction model with real device time, in/out state, source device and source server; "Is Transferred" flag.</li>
+      </ul>
+      <div class="m-note"><b>Take-away:</b> at €69 this is the best value and the deepest engineering on reliability + interpretation. It is the single most important benchmark for our build — and LGPL-3, so readable.</div>
+    </div>
+  </div>
+
+  <div class="module">
+    <div class="m-head">
+      <h3>4 · de_zkbiotime_integration — Digital Economics LLC</h3>
+      <div class="badges"><span class="badge">$31–53</span><span class="badge">OPL-1</span><span class="badge">1,350 LOC</span><span class="badge">v18</span><span class="badge">ZKBioTime 9.0</span></div>
+      <div class="m-tag">The most disciplined architecture per line of code: two-phase sync, per-punch error states, multi-company.</div>
+    </div>
+    <div class="m-body">
+      <ul>
+        <li><b>Two-phase sync:</b> a fetch cron (default 30 min, configurable) is deliberately separated from a processing cron, so network failures never block attendance creation. The cleanest reliability idea on the market.</li>
+        <li><b>Per-punch lifecycle states:</b> pending / processed / error / skipped, with the failure reason recorded, retry individually or in bulk, or skip with one click. Punches are stored <i>pre-interpretation</i> — a full audit trail.</li>
+        <li><b>Pairing engine with two modes:</b> explicit (ZK <code>punch_state</code> 0 = check-in, 1 = check-out) and alternating (punches toggle in/out based on whether an open attendance exists).</li>
+        <li><b>Flexible employee matching:</b> ZK Employee Code, Badge ID, or Identification Number; optional auto-creation of employees <i>and departments</i> from ZK data.</li>
+        <li><b>Device management:</b> mirrors all terminals with online/offline status, user counts, fingerprint/face counts, firmware versions.</li>
+        <li>Configurable server timezone, punch times converted to UTC; multi-company with per-company server configs and record rules (multi-site support); verification types: fingerprint, face, card, palm, password.</li>
+        <li>Full Arabic (ar_001) localization — the only bilingual module.</li>
+        <li><b>Roadmap</b> (i.e. gaps it admits): statistics dashboard, pushing employees Odoo → BioTime, webhooks, late/early alerts.</li>
+      </ul>
+      <div class="m-note"><b>Take-away:</b> the architectural reference for the staging/processing split and error recovery. Note it targets ZKBioTime 9.0 only, and its roadmap confirms nobody in this set does webhooks or two-way employee push well.</div>
+    </div>
+  </div>
+
+  <div class="module">
+    <div class="m-head">
+      <h3>5 · biotime_server_integration — TKN Solutions</h3>
+      <div class="badges"><span class="badge">€120</span><span class="badge">OPL-1</span><span class="badge">1,220 LOC</span><span class="badge">v15–19</span></div>
+      <div class="m-tag">The two-way utility: download and upload employees, devices, shifts, period-based downloads.</div>
+    </div>
+    <div class="m-body">
+      <ul>
+        <li><b>Two-way employee sync:</b> download employees from BioTime into Odoo <i>and</i> upload employees to BioTime (single or "upload all employees") — one of only two modules pushing data back.</li>
+        <li>Download devices; device records viewable in a Devices menu.</li>
+        <li><b>Download transactions by period</b> (custom start/end date) plus automatic daily transaction downloads.</li>
+        <li>Shifts menu showing employee shifts assigned in BioTime.</li>
+        <li>Hourly cron auto-creating attendance from transactions; attendance linked and visible on transaction records.</li>
+        <li>Group-access integration controlling who sees the module; Test Connection as admin; "45 days free assistance" support model.</li>
+      </ul>
+      <div class="m-note"><b>Take-away:</b> widest version coverage (15–19) suggests a long-lived, simple codebase. Its differentiators are the upload direction and the shifts menu; its hourly-only cron is the loosest sync of the set.</div>
+    </div>
+  </div>
+
+  <div class="module">
+    <div class="m-head">
+      <h3>6 · connector_biotime — Domiup</h3>
+      <div class="badges"><span class="badge">€80 + IAP</span><span class="badge">OPL-1</span><span class="badge">2,904 LOC</span><span class="badge">v16–19</span><span class="badge">needs OCA queue_job</span></div>
+      <div class="m-tag">The broadest two-way connector: pushes departments, work locations and employees; pulls transactions; supports BioTime Cloud.</div>
+    </div>
+    <div class="m-body">
+      <ul>
+        <li><b>Push side (unique depth):</b> Departments (<code>hr.department</code>), Work Locations (<code>hr.work.location</code>) and Employees, each with a "Push Now" button in a Push Actions tab — designed for initial master-data seeding at go-live. Employee push mode: All Employees vs Only Assigned.</li>
+        <li><b>Pull side:</b> imports punch logs into <code>biotime.transaction</code>, only pulling transactions newer than a recorded <b>Sync Last Date</b> cursor; "Pull Now" for manual fetch.</li>
+        <li><b>BioTime Cloud support</b> (since 18.0.1.0.4) — the only module connecting to ZKTeco's cloud API as well as on-prem.</li>
+        <li>Config: Host/IP, Port, Timezone, <b>Punch State In / Punch State Out</b> mapping, Is Cloud flag, <b>Pull Transaction Mode</b> (one request for all transactions vs one per device).</li>
+        <li>Transactions store Employee Code, Punch Time, State, Verify Type, Terminal Info; cron pairs valid IN/OUT punches into <code>hr.attendance</code>; linked attendance shown for traceability.</li>
+        <li><b>Background jobs via OCA <code>queue_job</code></b> (mandatory v19 prerequisite): retryable jobs, failed/incomplete transactions auto-retried up to a configurable limit.</li>
+        <li>Live demo server + YouTube walkthrough — strongest go-to-market packaging of the six.</li>
+      </ul>
+      <div class="m-note"><b>Take-away:</b> the reference for two-way scope and Cloud support. Cost of that breadth: a hard dependency on OCA queue_job, which is friction ms_bitotime explicitly avoids by shipping its own queue. €80 price is entry-level but in-app purchases are noted.</div>
+    </div>
+  </div>
+</section>
+
+<section id="matrix">
+  <h2><span class="secno">03</span>Feature matrix</h2>
+  <p><span class="y">✓</span> full support &nbsp;·&nbsp; <span class="p">◐</span> partial / basic &nbsp;·&nbsp; <span class="n">—</span> not offered. Columns: <b>Hu</b> biotime_sync · <b>Ya</b> yasir · <b>MS</b> ms_bitotime · <b>DE</b> de_zkbiotime · <b>TK</b> biotime_server_integration · <b>Do</b> connector_biotime.</p>
+  <div class="tbl-scroll">
+    <table class="matrix">
+      <thead>
+        <tr><th>Capability</th><th>Hu</th><th>Ya</th><th>MS</th><th>DE</th><th>TK</th><th>Do</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Server config + Test Connection</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td></tr>
+        <tr><td>Multiple server records / multi-site</td><td class="n">—</td><td class="p">◐</td><td class="p">◐</td><td class="y">✓</td><td class="p">◐</td><td class="y">✓</td></tr>
+        <tr><td>Token / JWT auth</td><td class="y">✓ (3 schemes)</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td></tr>
+        <tr><td>BioTime <i>Cloud</i> support</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="y">✓</td></tr>
+        <tr><td>Employee mapping by BioTime code</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td></tr>
+        <tr><td>Mapping by badge ID / ID number</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="y">✓</td><td class="n">—</td><td class="n">—</td></tr>
+        <tr><td>Import employees from BioTime</td><td class="y">✓</td><td class="n">—</td><td class="y">✓</td><td class="y">✓ (+depts)</td><td class="y">✓</td><td class="n">—</td></tr>
+        <tr><td>Push master data → BioTime (two-way)</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="y">✓ employees</td><td class="y">✓ depts+WL+emp</td></tr>
+        <tr><td>Device sync & monitoring</td><td class="n">—</td><td class="n">—</td><td class="p">◐</td><td class="y">✓ rich status</td><td class="y">✓</td><td class="n">—</td></tr>
+        <tr><td>Raw transaction staging table</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td></tr>
+        <tr><td>Pairing: explicit + alternating modes</td><td class="p">◐</td><td class="p">◐</td><td class="p">◐</td><td class="y">✓ both</td><td class="p">◐</td><td class="p">◐ configurable states</td></tr>
+        <tr><td>Cron auto-sync (configurable)</td><td class="y">✓</td><td class="y">✓ 7 min</td><td class="y">✓</td><td class="y">✓ 30 min</td><td class="y">✓ hourly/daily</td><td class="y">✓</td></tr>
+        <tr><td>Two-phase sync (fetch ≠ process cron)</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="y">✓</td><td class="n">—</td><td class="n">—</td></tr>
+        <tr><td>Background job queue + retries</td><td class="n">—</td><td class="n">—</td><td class="y">✓ built-in</td><td class="n">—</td><td class="n">—</td><td class="y">✓ OCA dep</td></tr>
+        <tr><td>Per-punch error states, retry/skip</td><td class="n">—</td><td class="p">◐</td><td class="p">◐ job-level</td><td class="y">✓</td><td class="n">—</td><td class="p">◐ retry limit</td></tr>
+        <tr><td>Idempotent re-pull (no duplicates)</td><td class="p">◐</td><td class="p">◐</td><td class="y">✓ explicit</td><td class="y">✓</td><td class="p">◐</td><td class="p">◐</td></tr>
+        <tr><td>Incremental pull cursor</td><td class="y">✓</td><td class="y">✓ start time</td><td class="y">✓ overlap window</td><td class="y">✓</td><td class="y">✓ period</td><td class="y">✓ sync last date</td></tr>
+        <tr><td>Late-in / early-out detection</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓ + exact minutes</td><td class="n">— (roadmap)</td><td class="n">—</td><td class="n">—</td></tr>
+        <tr><td>Missing check-out flagging</td><td class="n">—</td><td class="y">✓</td><td class="y">✓</td><td class="n">—</td><td class="n">—</td><td class="n">—</td></tr>
+        <tr><td>Overtime / break deduction rules</td><td class="y">✓</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="n">—</td></tr>
+        <tr><td>Night shift spanning midnight</td><td class="n">—</td><td class="n">—</td><td class="y">✓</td><td class="n">—</td><td class="n">—</td><td class="n">—</td></tr>
+        <tr><td>Timezone handling</td><td class="n">—</td><td class="n">—</td><td class="y">✓ per-employee</td><td class="y">✓ server tz</td><td class="n">—</td><td class="y">✓ server tz</td></tr>
+        <tr><td>Manual sync wizard w/ filters</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓ richest</td><td class="y">✓</td><td class="y">✓ period</td><td class="y">✓</td></tr>
+        <tr><td>Dashboard / charts / KPIs</td><td class="y">✓</td><td class="n">—</td><td class="y">✓</td><td class="n">— (roadmap)</td><td class="n">—</td><td class="n">—</td></tr>
+        <tr><td>Sync logs / audit trail</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td><td class="p">◐</td><td class="y">✓</td></tr>
+        <tr><td>Access groups / roles</td><td class="y">✓ 3 roles</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="p">◐ group access</td><td class="n">—</td></tr>
+        <tr><td>Multi-company record rules</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="y">✓</td><td class="n">—</td><td class="n">—</td></tr>
+        <tr><td>Shift / working-schedule awareness</td><td class="y">✓ rules</td><td class="n">—</td><td class="y">✓ schedule baseline</td><td class="n">—</td><td class="p">◐ shifts menu</td><td class="n">—</td></tr>
+        <tr><td>Localization (non-English)</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="y">✓ Arabic</td><td class="n">—</td><td class="n">—</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p><small>Honest caveat on method: this matrix is built from the vendors' own listings (feature claims, screenshots, changelogs and FAQs), not from source code — except ms_bitotime and yasir, whose LGPL-3 license allows inspection. Claims were cross-checked against each page's technical details where provided.</small></p>
+</section>
+
+<section id="common">
+  <h2><span class="secno">04</span>What all six share — the table stakes</h2>
+  <p>Every module, without exception, implements the same seven-part skeleton. This is the minimum viable product for this category, and any missing piece is an instant dealbreaker for buyers:</p>
+  <ol class="flow">
+    <li><b>Server configuration model</b> — one record holding host/IP, port, username/password (token auth), plus sync settings; a <b>Test Connection</b> button validates credentials before anything runs.</li>
+    <li><b>Employee mapping</b> — a <code>biotime_code</code>-style field on <code>hr.employee</code>; punches link to Odoo employees through it. Weak mapping is the #1 support complaint in this category.</li>
+    <li><b>Raw transaction staging</b> — punches are stored first in their own model (source device, punch state, verify type, raw device time) before any interpretation, giving traceability and replay.</li>
+    <li><b>Cron-driven pulling</b> — scheduled actions fetch new transactions on an interval (7 min to daily across the set), with some form of incremental cursor so old data isn't re-fetched.</li>
+    <li><b>Pairing engine</b> — raw punches are converted into check-in/check-out pairs to create <code>hr.attendance</code> records, with duplicate prevention.</li>
+    <li><b>Device/employee/transaction views</b> — dedicated menus under the Attendances app so admins can inspect what was synced.</li>
+    <li><b>Standard dependencies only</b> — <code>hr</code>, <code>hr_attendance</code>, <code>mail</code>. Nothing else. (connector_biotime's extra OCA <code>queue_job</code> requirement is presented as friction by its competitor.)</li>
+  </ol>
+  <div class="callout"><b>Implication for us:</b> table stakes are cheap to match — the differentiation budget should go to reliability (phase separation, queues, idempotency) and interpretation (late/missing/night-shift/timezone), because that is precisely where the six modules split into "thin cron script" and "real product".</div>
+</section>
+
+<section id="tiers">
+  <h2><span class="secno">05</span>Differentiators, in three tiers</h2>
+  <div class="tier">
+    <h3>Tier A — decide before writing any code (architecture-level)</h3>
+    <ul>
+      <li><b>Two-phase sync</b> (DE): fetch cron stores raw punches; a separate process cron interprets them. Network failures degrade fetching without ever blocking attendance creation.</li>
+      <li><b>Idempotency by BioTime transaction ID</b> (MS): re-running any period imports zero duplicates — turns every operational mistake into a non-event.</li>
+      <li><b>Background job queue</b> (MS built-in vs Do's OCA dependency): with retries (1/5/10/30 min backoff), serialized channels to protect the BioTime server, and a job UI with error traces and requeue. Shipping our own (MS-style) avoids the OCA dependency — a real selling point.</li>
+      <li><b>Per-punch lifecycle states</b> pending → processed / error / skipped with recorded failure reasons and bulk retry/skip (DE): the difference between "sync silently drops data" and "HR can fix data".</li>
+    </ul>
+  </div>
+  <div class="tier t2">
+    <h3>Tier B — interpretation quality (what HR actually feels)</h3>
+    <ul>
+      <li><b>Late-in detection with exact minutes from the real shift start</b> (MS, Hu, Ya) — using the employee's working schedule as the baseline.</li>
+      <li><b>Missing check-out flagging</b> instead of silently wrong records (MS, Ya).</li>
+      <li><b>Night shifts as a single record spanning midnight</b> (MS only — a genuine hole in every competitor).</li>
+      <li><b>Re-evaluation on schedule change</b> (MS): editing working hours or grace periods re-computes already-imported punches.</li>
+      <li><b>Timezone correctness</b> (MS per-employee; DE/Do server-level): device clock skew must not fabricate lateness.</li>
+      <li><b>Business-rule fields</b> (Hu): break duration deduction, late tolerance, overtime threshold.</li>
+    </ul>
+  </div>
+  <div class="tier t3">
+    <h3>Tier C — scope & packaging</h3>
+    <ul>
+      <li><b>Two-way push</b> (Do: departments, work locations, employees with Push Now; TK: employees): valuable at go-live for seeding BioTime from Odoo HR.</li>
+      <li><b>BioTime Cloud flag</b> (Do only): cloud vs on-prem API endpoints.</li>
+      <li><b>Device monitoring</b> (DE richest: online/offline, user/fingerprint/face counts, firmware) — turns the module into light access-control ops.</li>
+      <li><b>Dashboard + roles</b> (Hu, MS) and <b>multi-company</b> (DE) — enterprise-readiness signals.</li>
+      <li><b>Advanced manual sync wizard</b> (MS: date range × device × employee, optional direct transfer) — the tool support uses when a device was offline for a week.</li>
+      <li><b>Multiple auth schemes</b> (Hu: Token/JWT/Basic) and <b>pull granularity</b> (Do: one request for all vs per device).</li>
+    </ul>
+  </div>
+</section>
+
+<section id="gaps">
+  <h2><span class="secno">06</span>Gaps nobody covers — our opening</h2>
+  <ul>
+    <li><b>Real-time ingestion.</b> Every module polls on cron. DE lists webhooks on its roadmap — meaning even its author considers it unsolved. BioTime supports transaction webhooks/HTTP listeners; a webhook endpoint plus the staging table would give us true real-time attendance with cron as fallback.</li>
+    <li><b>Reliability + interpretation together.</b> DE owns error recovery but has no late/night-shift logic; MS owns interpretation but its error states are job-level, not punch-level. No module combines both.</li>
+    <li><b>Cloud and on-prem in one product.</b> Only Do supports Cloud, and it lacks interpretation quality. A connector that auto-detects cloud vs on-prem endpoints would be first.</li>
+    <li><b>Multi-company + per-employee timezone together</b> — DE and MS each hold one half.</li>
+    <li><b>Overtime/leave integration.</b> Only Hunter touches overtime, and only as a threshold rule. Linking punches to Odoo overtime requests, extra hours and payslips is untouched territory.</li>
+    <li><b>Alerting.</b> Late arrival / early departure / device-offline notifications (DE roadmap again) — missing across the board.</li>
+  </ul>
+</section>
+
+<section id="blueprint">
+  <h2><span class="secno">07</span>Recommended blueprint for our module</h2>
+  <h3>Model layout</h3>
+  <pre class="code">biotime.server          host, port, auth mode (token/JWT/basic), credentials,
+                        timezone, page size, pairing mode, punch_state_in/out,
+                        sync interval, last_sync_date, is_cloud, active, company_id
+biotime.transaction     (staging) biotime_id [unique], employee_code, punch_time_utc,
+                        punch_state, verify_mode, terminal_sn, terminal_name,
+                        state: pending | processed | error | skipped,
+                        error_msg, attendance_id, server_id
+biotime.device          sn, name, ip, state, user/fp/face counts, firmware, last_activity
+biotime.job             (built-in queue) server, method, state, retries, next_retry,
+                        error_trace, channel  ← serialized per server
+hr.employee (inherit)   biotime_code, biotime_server_id</pre>
+  <h3>Sync flow</h3>
+  <ol class="flow">
+    <li><b>Fetch cron / webhook</b> — pull new transactions (incremental cursor per server; overlap window for clock skew) and store them raw, keyed by BioTime transaction ID. Nothing is interpreted here.</li>
+    <li><b>Process cron</b> — map employee (code → badge → ID fallback, like DE), pair punches (explicit mode default, alternating fallback), create <code>hr.attendance</code>, mark transactions processed or error with a reason.</li>
+    <li><b>Queue layer</b> — every remote call runs as a job with exponential retry; one job at a time per server so BioTime is never hammered.</li>
+    <li><b>HR layer</b> — late-in minutes, missing-checkout flags, night-shift merging, per-employee timezone, re-evaluation when the working schedule changes.</li>
+    <li><b>Surfaces</b> — sync log + job board, device monitor, dashboard, manual wizard (period × device × employee).</li>
+  </ol>
+  <div class="callout"><b>Phasing suggestion:</b> MVP = table stakes + Tier A reliability (idempotency, two-phase, simple queue) — that alone matches the best product in the market. Phase 2 = Tier B interpretation. Phase 3 = two-way push, Cloud, dashboard, alerts, webhooks.</div>
+</section>
+
+<section id="risks">
+  <h2><span class="secno">08</span>Risks &amp; notes for the build</h2>
+  <ul>
+    <li><b>License discipline.</b> Four of six modules are OPL-1 proprietary — feature inspiration is fine, code is not. ms_bitotime and yasir are LGPL-3 and legally readable: use them as reference implementations, never copy assets or text.</li>
+    <li><b>BioTime API versioning is the top technical risk.</b> DE supports only ZKBioTime 9.0 (REST); Yasir targets 8.5; Do needed a separate Cloud flag. Before any code, pin down the client's exact BioTime version(s) and verify endpoints and the <code>punch_state</code> codes against it (0 = check-in, 1 = check-out is confirmed by the listings; other states need verification).</li>
+    <li><b>Listing claims ≠ behavior.</b> This research is from vendor pages; several claims (e.g. yasir's Odoo 18/19 inconsistency, Hunter's conflicting prices €449/€649) show listings can be sloppy. Buying ms_bitotime (€69) and DE ($31) as reference products would be cheap due diligence.</li>
+    <li><b>The queue decision.</b> OCA <code>queue_job</code> is mature but adds a dependency buyers must install; ms_bitotime proves a compact built-in queue is viable and marketable ("no external dependencies"). Recommend built-in, channel-serialized.</li>
+    <li><b>Interval expectations.</b> Cron intervals in the wild range 7 min to hourly. With webhooks in Phase 3 we can beat the entire market on freshness; until then, default to 10–15 min and make it configurable.</li>
+  </ul>
+</section>
+
+<footer>
+  Researched from the six Odoo apps store listings on 3 Nov 2025 · biotime_sync (Hunter BI) · yasir_biotime_server_integration_v18 (Eng. Yasir Habeeb) · ms_bitotime (Mohamed Saied) · de_zkbiotime_integration (Digital Economics LLC) · biotime_server_integration (TKN Solutions) · connector_biotime (Domiup) · Prepared as the feature baseline for our own BioTime ↔ Odoo connector (working name: BioTime Connect Pro).
+</footer>
+
+</div>

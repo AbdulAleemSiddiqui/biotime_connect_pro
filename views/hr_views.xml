@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="hr_employee_view_form_biotime" model="ir.ui.view">
+        <field name="name">hr.employee.form.biotime</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="BioTime" name="biotime" groups="biotime_connect_pro.group_biotime_user">
+                    <group>
+                        <field name="biotime_code"/>
+                        <field name="biotime_server_id"/>
+                        <field name="biotime_remote_id"/>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

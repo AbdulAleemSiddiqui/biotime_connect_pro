@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Devices -->
+    <record id="biotime_device_view_list" model="ir.ui.view">
+        <field name="name">biotime.device.list</field>
+        <field name="model">biotime.device</field>
+        <field name="arch" type="xml">
+            <list decoration-danger="status == 'offline'" decoration-success="status == 'online'">
+                <field name="name"/>
+                <field name="sn"/>
+                <field name="server_id"/>
+                <field name="ip_address"/>
+                <field name="status"/>
+                <field name="latency_ms" optional="hide"/>
+                <field name="last_ping" optional="hide"/>
+                <field name="user_count"/>
+                <field name="fp_count"/>
+                <field name="face_count"/>
+                <field name="palm_count"/>
+                <field name="firmware"/>
+                <field name="last_activity"/>
+            </list>
+        </field>
+    </record>
+    <record id="biotime_device_view_form" model="ir.ui.view">
+        <field name="name">biotime.device.form</field>
+        <field name="model">biotime.device</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_ping_terminal" string="Ping Device" type="object" class="btn-primary"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="sn"/>
+                            <field name="server_id"/>
+                            <field name="ip_address"/>
+                            <field name="status"/>
+                        </group>
+                        <group>
+                            <field name="firmware"/>
+                            <field name="user_count"/>
+                            <field name="fp_count"/>
+                            <field name="face_count"/>
+                            <field name="palm_count"/>
+                            <field name="last_activity"/>
+                            <field name="last_ping"/>
+                            <field name="latency_ms"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="biotime_device_action" model="ir.actions.act_window">
+        <field name="name">Devices</field>
+        <field name="res_model">biotime.device</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Sync logs -->
+    <record id="biotime_log_view_list" model="ir.ui.view">
+        <field name="name">biotime.sync.log.list</field>
+        <field name="model">biotime.sync.log</field>
+        <field name="arch" type="xml">
+            <list decoration-danger="status == 'failed'" decoration-warning="status == 'warning'" create="0">
+                <field name="create_date"/>
+                <field name="server_id"/>
+                <field name="operation"/>
+                <field name="status"/>
+                <field name="created"/>
+                <field name="skipped"/>
+                <field name="errors"/>
+                <field name="duration"/>
+                <field name="message"/>
+            </list>
+        </field>
+    </record>
+    <record id="biotime_log_action" model="ir.actions.act_window">
+        <field name="name">Sync Logs</field>
+        <field name="res_model">biotime.sync.log</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <!-- Job queue -->
+    <record id="biotime_job_view_list" model="ir.ui.view">
+        <field name="name">biotime.job.list</field>
+        <field name="model">biotime.job</field>
+        <field name="arch" type="xml">
+            <list decoration-danger="state == 'failed'" decoration-success="state == 'done'">
+                <header>
+                    <button name="action_requeue" string="Requeue" type="object"/>
+                </header>
+                <field name="name"/>
+                <field name="job_type"/>
+                <field name="state"/>
+                <field name="attempts"/>
+                <field name="next_run"/>
+                <field name="date_done"/>
+                <field name="result"/>
+                <field name="error"/>
+            </list>
+        </field>
+    </record>
+    <record id="biotime_job_view_form" model="ir.ui.view">
+        <field name="name">biotime.job.form</field>
+        <field name="model">biotime.job</field>
+        <field name="arch" type="xml">
+            <form create="0">
+                <header>
+                    <button name="action_requeue" string="Requeue" type="object" class="btn-primary"
+                            invisible="state not in ('failed', 'done')"/>
+                    <field name="state" widget="statusbar" statusbar_visible="pending,started,done"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="server_id"/>
+                            <field name="job_type"/>
+                            <field name="attempts"/>
+                        </group>
+                        <group>
+                            <field name="next_run"/>
+                            <field name="date_done"/>
+                            <field name="result"/>
+                        </group>
+                    </group>
+                    <field name="error" placeholder="No error."/>
+                    <field name="params" invisible="1"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="biotime_job_action" model="ir.actions.act_window">
+        <field name="name">Job Queue</field>
+        <field name="res_model">biotime.job</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Late reasons -->
+    <record id="biotime_late_reason_view_list" model="ir.ui.view">
+        <field name="name">biotime.late.reason.list</field>
+        <field name="model">biotime.late.reason</field>
+        <field name="arch" type="xml">
+            <list decoration-warning="state in ('submitted', 'manager_approved')"
+                  decoration-success="state == 'approved'" decoration-danger="state == 'rejected'">
+                <field name="employee_id"/>
+                <field name="date"/>
+                <field name="late_minutes"/>
+                <field name="category"/>
+                <field name="reason" optional="hide"/>
+                <field name="state" widget="badge"
+                       decoration-info="state == 'manager_approved'"
+                       decoration-success="state == 'approved'"
+                       decoration-danger="state == 'rejected'"/>
+            </list>
+        </field>
+    </record>
+    <record id="biotime_late_reason_view_form" model="ir.ui.view">
+        <field name="name">biotime.late.reason.form</field>
+        <field name="model">biotime.late.reason</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_manager_approve" string="Approve (Manager)" type="object"
+                            class="btn-primary" invisible="state != 'submitted'"/>
+                    <button name="action_hr_approve" string="Approve (HR)" type="object"
+                            invisible="state not in ('submitted', 'manager_approved')"/>
+                    <button name="action_reject" string="Reject" type="object"
+                            invisible="state not in ('submitted', 'manager_approved')"/>
+                    <field name="state" widget="statusbar" statusbar_visible="submitted,manager_approved,approved"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="employee_id"/>
+                            <field name="date"/>
+                            <field name="late_minutes"/>
+                        </group>
+                        <group>
+                            <field name="category"/>
+                            <field name="manager_id" readonly="1"/>
+                            <field name="hr_id" readonly="1"/>
+                        </group>
+                    </group>
+                    <field name="reason" placeholder="Explain the late arrival…"/>
+                    <field name="note" placeholder="Reviewer note…" readonly="1"/>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    <record id="biotime_late_reason_action" model="ir.actions.act_window">
+        <field name="name">Late Reasons</field>
+        <field name="res_model">biotime.late.reason</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Overtime sheets -->
+    <record id="biotime_overtime_view_list" model="ir.ui.view">
+        <field name="name">biotime.overtime.sheet.list</field>
+        <field name="model">biotime.overtime.sheet</field>
+        <field name="arch" type="xml">
+            <list decoration-warning="state in ('submitted', 'manager_approved')"
+                  decoration-success="state == 'approved'" decoration-danger="state == 'rejected'">
+                <field name="employee_id"/>
+                <field name="date"/>
+                <field name="hours_claimed" widget="float_time"/>
+                <field name="hours_synced" widget="float_time" optional="show"/>
+                <field name="reason"/>
+                <field name="state" widget="badge"
+                       decoration-info="state == 'manager_approved'"
+                       decoration-success="state == 'approved'"
+                       decoration-danger="state == 'rejected'"/>
+            </list>
+        </field>
+    </record>
+    <record id="biotime_overtime_view_form" model="ir.ui.view">
+        <field name="name">biotime.overtime.sheet.form</field>
+        <field name="model">biotime.overtime.sheet</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_manager_approve" string="Approve (Manager)" type="object"
+                            class="btn-primary" invisible="state != 'submitted'"/>
+                    <button name="action_hr_approve" string="Approve (HR)" type="object"
+                            invisible="state not in ('submitted', 'manager_approved')"/>
+                    <button name="action_reject" string="Reject" type="object"
+                            invisible="state not in ('submitted', 'manager_approved')"/>
+                    <field name="state" widget="statusbar" statusbar_visible="submitted,manager_approved,approved"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="employee_id"/>
+                            <field name="date"/>
+                            <field name="reason"/>
+                        </group>
+                        <group>
+                            <field name="hours_claimed" widget="float_time"/>
+                            <field name="hours_synced" widget="float_time"/>
+                            <button name="action_suggest_from_sync" string="Suggest from sync" type="object"
+                                    icon="fa-magic"/>
+                            <field name="manager_id" readonly="1"/>
+                            <field name="hr_id" readonly="1"/>
+                        </group>
+                    </group>
+                    <field name="note" readonly="1" placeholder="Reviewer note…"/>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    <record id="biotime_overtime_action" model="ir.actions.act_window">
+        <field name="name">Overtime Sheets</field>
+        <field name="res_model">biotime.overtime.sheet</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Menus -->
+    <menuitem id="menu_biotime_review" name="Review" parent="menu_biotime_root" sequence="10"/>
+    <menuitem id="menu_biotime_late_reasons" name="Late Reasons" parent="menu_biotime_review"
+              action="biotime_late_reason_action" sequence="1"/>
+    <menuitem id="menu_biotime_overtime" name="Overtime Sheets" parent="menu_biotime_review"
+              action="biotime_overtime_action" sequence="2"/>
+
+    <!-- Reminder cron: nudge reviewers before the payroll deadline (21st) -->
+    <record id="ir_cron_biotime_payroll_reminder" model="ir.cron">
+        <field name="name">BioTime: payroll review reminders</field>
+        <field name="model_id" ref="model_biotime_late_reason"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_payroll_reminder()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="active" eval="True"/>
+    </record>
+</odoo>
